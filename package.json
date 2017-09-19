@@ -1,0 +1,24 @@
+{
+  "name": "BotbuilderConnector-for-LineBot",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "git@github.com:sakkuru/BotbuilderConnector-for-LineBot.git",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon -w src -w config -e js,ts,json --exec 'tsc || true && node dist/index.js'",
+    "format": "prettier"
+  },
+  "author": "Team 44",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^1.12.1",
+    "prettier": "^1.7.0",
+    "tslint": "^5.7.0",
+    "tslint-config-prettier": "^1.5.0",
+    "typescript": "^2.5.2"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^3.0.0",
+    "botbuilder": "^3.9.1"
+  }
+}
