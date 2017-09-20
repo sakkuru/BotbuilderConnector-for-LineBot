@@ -18,13 +18,13 @@ export class LineConnector implements botbuilder.IConnector {
             if (req.body.events) {
                 const events = req.body.events;
                 events.forEach(event => {
+                    if(event.tyme !== 'message') return;
                     console.log(event);
                     console.log(event.message);
-                    // this.replyTokens[event.]
+                    this.replyTokens[event.source.userID] = event.replyToken;
                 });
-                // this.replyTokens[req.body]
-                // this.lastMessageToken = req.body;
             }
+            console.log(this.replyTokens);
             res.status(200).send('aaaa')
         }
 
