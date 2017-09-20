@@ -13,6 +13,7 @@ class LineConnector {
             console.log('middleware', req.body);
             if (req.body.events) {
                 const events = req.body.events;
+                console.log(events);
                 events.forEach(event => {
                     if (event.tyme !== 'message')
                         return;
@@ -22,7 +23,7 @@ class LineConnector {
                 });
             }
             console.log(this.replyTokens);
-            res.status(200).send('aaaa');
+            res.status(200);
         };
     }
     onEvent(handler) {
