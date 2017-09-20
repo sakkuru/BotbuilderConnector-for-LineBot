@@ -12,6 +12,12 @@ class LineConnector {
                 return;
             console.log('middleware', req.body);
             if (req.body.type === 'message' && req.body.text) {
+                const events = req.body.events;
+                events.forEach(event => {
+                    console.log(event);
+                    console.log(event.message);
+                    // this.replyTokens[event.]
+                });
                 // this.replyTokens[req.body]
                 // this.lastMessageToken = req.body;
             }
