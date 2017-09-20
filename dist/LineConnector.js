@@ -8,36 +8,35 @@ class LineConnector {
     }
     listen(req, res) {
         return (req, res) => {
-            if (!req.body)
+            if (!req.body) {
                 return;
-            console.log('middleware', req.body);
+            }
+            console.log('listen', req.body);
             if (req.body.events) {
                 const events = req.body.events;
-                console.log(events);
                 events.forEach(event => {
-                    if (event.tyme !== 'message')
+                    if (event.type !== 'message') {
                         return;
-                    console.log(event);
-                    console.log(event.message);
-                    this.replyTokens[event.source.userID] = event.replyToken;
+                    }
+                    this.replyTokens[event.source.userId] = event.replyToken;
                 });
             }
-            console.log(this.replyTokens);
             res.status(200);
         };
     }
     onEvent(handler) {
-        console.log(handler);
+        console.log('on Event');
         this.handler = handler;
+        // handler();
         // throw new Error("Method not implemented.");
     }
     send(messages, callback) {
-        // throw new Error("Method not implemented.");
-        console.log(messages);
+        console.log('send', messages);
         const lineMessage = {
             type: 'message',
             text: messages[0].text,
         };
+        // const replyToken = this.replyTokens[];
         this.client.replyMessage(this.Token, lineMessage)
             .then()
             .catch(error => {

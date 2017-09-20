@@ -7,7 +7,6 @@ const line = require('./dist/LineConnector.js');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-
 //=========================================================
 // Bot Setup
 //=========================================================
@@ -32,6 +31,10 @@ const lineOptions = {
 const lineChannel = new line.LineConnector(lineOptions);
 bot.connector(line.lineChannelId, lineChannel);
 app.post('/api/messages', lineChannel.listen());
+
+lineChannel.onEvent(event => {
+    console.log('onevent', event);
+});
 
 app.get('/', (req, res) => {
     res.send(`Bot is running on port ${port}!\n`);
