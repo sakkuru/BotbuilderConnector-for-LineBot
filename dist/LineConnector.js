@@ -11,7 +11,7 @@ class LineConnector {
             if (!req.body)
                 return;
             console.log('middleware', req.body);
-            if (req.body.type === 'message' && req.body.text) {
+            if (req.body.events) {
                 const events = req.body.events;
                 events.forEach(event => {
                     console.log(event);
