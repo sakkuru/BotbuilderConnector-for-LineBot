@@ -2,11 +2,7 @@ const builder = require('botbuilder');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-// const line = require('botbuilder-line');
 const line = require('./dist/LineConnector.js');
-
-// const Util = require('./Util');
-// const util = new Util();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -29,27 +25,17 @@ const connector = new builder.ChatConnector({
 
 const bot = new builder.UniversalBot(connector);
 
-let replyToken;
-// for getting all user input
-app.all('/api/messages', (req, res, next) => {
-    if (req.body.type === 'message' && req.body.text) {
-        console.log(req.body);
-        replyToken = req.body;
-    }
-    next();
-});
-app.post('/api/messages', connector.listen());
+const lineOptions = {
+    channelAccessToken: process.env.LINE_TOKEN,
+}
+
+const lineChannel = new line.LineConnector(lineOptions);
+bot.connector(line.lineChannelId, lineChannel);
+app.post('/api/messages', lineChannel.listen());
 
 app.get('/', (req, res) => {
     res.send(`Bot is running on port ${port}!\n`);
 });
-
-const lineOptions = {
-    channelAccessToken: process.env.LINE_TOKEN,
-}
-const lineChannel = new line.LineConnector(lineOptions);
-bot.connector(line.lineChannelId, lineChannel);
-// app.use('/line/webhook', lineChannel.listen());
 
 //=========================================================
 // Bots Dialogs
@@ -96,10 +82,8 @@ const firstChoices = {
 // default first dialog
 bot.dialog('/', [
     session => {
-        console.log('replyToken', replyToken);
         session.send("こんにちは。");
         session.beginDialog('Greeting');
-
     }
 ]);
 
@@ -151,10 +135,10 @@ bot.dialog('GetFreeText', [
     },
     (session, results) => {
         console.log(results.response);
-        const res = util.getLuis(results.response).then(res => {
-            console.log('res', res);
-            // process LUIS response
-        });
+        // const res = util.getLuis(results.response).then(res => {
+        //     console.log('res', res);
+        //     // process LUIS response
+        // });
     }
 ]);
 
@@ -166,7 +150,7 @@ bot.dialog('ImageRecognition', [
         const promises = [];
         results.response.forEach(content => {
             if (content.contentType.match('image')) {
-                promises.push(util.getCognitiveResults(content.contentUrl));
+                // promises.push(util.getCognitiveResults(content.contentUrl));
             }
         });
 
@@ -216,12 +200,12 @@ bot.dialog('Exit', [
     matches: /^exit$/i
 });
 
-// // Always accepts free text input
-// bot.dialog('Any', [
-//     session => {
-//         session.endDialog("自由入力を受け付けました。");
-//         session.beginDialog('FirstQuestion');
-//     },
-// ]).triggerAction({
-//     matches: /^.*$/i
-// });
+// Always accepts free text input
+bot.dialog('Any', [
+    session => {
+        session.endDialog("自由入力を受け付けました。");
+        session.beginDialog('FirstQuestion');
+    },
+]).triggerAction({
+    matches: /^.*$/i
+});

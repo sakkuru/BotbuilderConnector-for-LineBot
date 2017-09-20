@@ -5,14 +5,23 @@ export class LineConnector implements botbuilder.IConnector {
     public lastMessageToken: string;
     private client: Client;
     private handler: void;
-    // private Token: string;
+    private replyTokens = {};
 
     constructor(config: Line.ClientConfig) {
         this.client = new Client(config);
     }
 
-    public listen() {
-        // return this.client.middleware();
+    public listen(req, res) {
+        return (req, res) => {
+            if(!req.body) return;
+            console.log('middleware', req.body);
+            if (req.body.type === 'message' && req.body.text) {
+                // this.replyTokens[req.body]
+                // this.lastMessageToken = req.body;
+            }
+            res.status(200).send('aaaa')
+        }
+
     }
 
     public onEvent(handler: (events: botbuilder.IEvent[], callback ? : ((err: Error) => void)) => void): void {
