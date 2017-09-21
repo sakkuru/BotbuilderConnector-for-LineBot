@@ -82,20 +82,18 @@ directLine.activity$
   // .filter(activity => activity.type === "message")
   .subscribe((message: DirectLineMessage) => {
     logger.log("received message ", message);
-    if (Object.keys(message).includes("replyToId")) {
-      const lineMessage: Line.Message = {
-        text: message.text || "",
-        type: "text"
-      };
-      if (message.conversation && message.conversation.id) {
-        lineClient
-          .pushMessage(conversations[message.conversation.id || ""], lineMessage)
-          .then(() => {
-            logger.log("Replied with", lineMessage);
-          })
-          .catch((err: Error) => {
-            logger.error(err.message);
-          });
-      }
+    const lineMessage: Line.Message = {
+      text: message.text || "",
+      type: "text"
+    };
+    if (message.conversation && message.conversation.id) {
+      lineClient
+        .pushMessage(conversations[message.conversation.id || ""], lineMessage)
+        .then(() => {
+          logger.log("Replied with", lineMessage);
+        })
+        .catch((err: Error) => {
+          logger.error(err.message);
+        });
     }
   });
