@@ -88,8 +88,11 @@ directLine.activity$
       message.attachments.forEach(element => {
         switch (element.contentType) {
           case "application/vnd.microsoft.card.video":
-            const videoConverter = new VideoConverter();
-            lineMessages.push(videoConverter.DirectLineToLine(message));
+            // const videoConverter = new VideoConverter(); //Masa will update it
+            lineMessages.push( {
+              text: "Sorry, but Video messsage type can not be displayed yet.",
+              type: "text"
+            });
             break;
           default:
           lineMessages.push( {
@@ -106,15 +109,13 @@ directLine.activity$
       });
     }
     if (message && message.conversation && message.conversation.id) {
-      lineMessages.forEach(lineMessage => {
         lineClient
-        .pushMessage(conversations[message.conversation.id], lineMessage)
+        .pushMessage(conversations[message.conversation.id], lineMessages)
         .then(() => {
-          logger.log("Replied with", lineMessage);
+          logger.log("Replied with", lineMessages);
         })
         .catch((err: Error) => {
           logger.error(err.message);
         });
-      });
     }
   });
