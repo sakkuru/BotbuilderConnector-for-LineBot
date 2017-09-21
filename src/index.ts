@@ -1,4 +1,4 @@
-import { Client, middleware, validateSignature } from "@line/bot-sdk";
+import { Client, middleware } from "@line/bot-sdk";
 import { Middleware } from "@line/bot-sdk/dist/middleware";
 import { DirectLine, Message as DirectLineMessage } from "botframework-directlinejs";
 import * as restify from "restify";
@@ -23,12 +23,6 @@ const conversations: {
   [messageId: string]: string;
 } = {};
 
-const server = restify.createServer();
-server.use(restifyPlugins.bodyParser({}));
-
-server.listen(process.env.port || process.env.PORT || 9999 || 3978, () => {
-  logger.log("%s listening to %s", server.name, server.url);
-});
 
 const lineConfig: Line.ClientConfig & Line.MiddlewareConfig = {
   channelAccessToken:
@@ -36,10 +30,15 @@ const lineConfig: Line.ClientConfig & Line.MiddlewareConfig = {
     "pjGjFSn+tjX+rfWBfNIR3wbwS/KXA1GDHc0Qb3RMXxNVFLAyjVFfcfaIbte2LWFOEYy2wNENtLROxUiPeqGrg2MOwdz1h+DGEFCGUurLSXnDTz8ki9X3/OZ43tz1KJWbYmDo0/uvsqDReZ1DZP9ZcwdB04t89/1O/w1cDnyilFU=",
   channelSecret: process.env.LINE_CHANNEL_SECRET || "bdfbed31e6f523f7bfbcdf838ff01caf"
 };
-
 const lineClient = new Client(lineConfig);
 
-const endpoint = "/";
+const server = restify.createServer();
+server.use(middleware(lineConfig));
+server.listen(process.env.port || process.env.PORT || 9999 || 3978, () => {
+  logger.log("%s listening to %s", server.name, server.url);
+});
+
+const endpoint = process.env.ENDPOINT || "/";
 server.post(endpoint, async (req, res) => {
   if (Array.isArray(req.body.events)) {
     for (const event of req.body.events) {

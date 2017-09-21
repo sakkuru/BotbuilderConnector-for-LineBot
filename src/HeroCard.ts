@@ -9,7 +9,7 @@ export class HeroCard implements AbstractConverter {
         return {} as DirectLineActivity;
     }
 
-    public DirectLineToLine (event: DirectLineActivity): Line.Message[] {
+    public DirectLineToLine (event: DirectLineActivity): Line.Message {
         const attachment = event.attachments[0];
         const content = attachment.content;
         const lineButtons = [];
@@ -47,6 +47,6 @@ export class HeroCard implements AbstractConverter {
             lineMessage.template.actions = lineButtons;
         }
 
-        return [lineMessage];
+        return lineMessage;
     }
 }
