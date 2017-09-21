@@ -3,9 +3,7 @@ import { Middleware } from "@line/bot-sdk/dist/middleware";
 import { DirectLine, Message as DirectLineMessage } from "botframework-directlinejs";
 import * as restify from "restify";
 import * as restifyPlugins from "restify-plugins";
-import { HeroCard } from "./HeroCard"
 import { VideoConverter } from "./VideoConverter";
-
 const XMLHttpRequest = require("xhr2");
 
 global = Object.assign(global, { XMLHttpRequest });
@@ -96,15 +94,11 @@ directLine.activity$
               type: "text"
             });
             break;
-          case "application/vnd.microsoft.card.hero":
-            const hero = new HeroCard();
-            lineMessages.push(hero.DirectLineToLine(message));
-            break;
           default:
-            lineMessages.push( {
-              text: "Sorry, but this messsage type can not be displayed yet.",
-              type: "text"
-            });
+          lineMessages.push( {
+            text: "Sorry, but this messsage type can not be displayed yet.",
+            type: "text"
+          });            
             break;
         }
       });
