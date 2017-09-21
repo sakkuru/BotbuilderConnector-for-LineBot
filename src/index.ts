@@ -3,6 +3,7 @@ import { Middleware } from "@line/bot-sdk/dist/middleware";
 import { DirectLine, Message as DirectLineMessage } from "botframework-directlinejs";
 import * as restify from "restify";
 import * as restifyPlugins from "restify-plugins";
+import {VideoConverter} from "./VideoConverter";
 const XMLHttpRequest = require("xhr2");
 
 global = Object.assign(global, { XMLHttpRequest });
@@ -82,10 +83,17 @@ directLine.activity$
   // .filter(activity => activity.type === "message")
   .subscribe((message: DirectLineMessage) => {
     logger.log("received message ", message);
-    const lineMessage: Line.Message = {
-      text: message.text || "",
-      type: "text"
-    };
+    let lineMessage:Line.Message;
+    if(message.attachments != null && message.attachments[0].contentType == "application/vnd.microsoft.card.video"){
+      const videoConverter = new VideoConverter();
+      lineMessage = videoConverter.DirectLineToLine(message);
+    }else
+    {
+      lineMessage = {
+        text: message.text || "",
+        type: "text"
+      };
+    }
     if (message.conversation && message.conversation.id) {
       lineClient
         .pushMessage(conversations[message.conversation.id], lineMessage)
