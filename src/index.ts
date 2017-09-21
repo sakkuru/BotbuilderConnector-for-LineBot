@@ -88,7 +88,7 @@ directLine.activity$
     };
     if (message.conversation && message.conversation.id) {
       lineClient
-        .pushMessage(conversations[message.conversation.id || ""], lineMessage)
+        .pushMessage(conversations[message.conversation.id], lineMessage)
         .then(() => {
           logger.log("Replied with", lineMessage);
         })
