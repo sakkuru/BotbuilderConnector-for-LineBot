@@ -4,6 +4,8 @@ import { DirectLine, Message as DirectLineMessage } from "botframework-directlin
 import * as restify from "restify";
 import * as restifyPlugins from "restify-plugins";
 import {VideoConverter} from "./VideoConverter";
+import {HeroCard} from "./HeroCard";
+
 const XMLHttpRequest = require("xhr2");
 
 global = Object.assign(global, { XMLHttpRequest });
@@ -47,7 +49,7 @@ server.post(endpoint, async (req, res) => {
         case "message":
           const activity: DirectLineMessage = {
             from: {
-              id: event.replyToken,
+              id: event.source.userId,
               name: event.source.userId // TODO:figure out the user's name.
             },
             text: event.message.text,
@@ -84,16 +86,25 @@ directLine.activity$
   .subscribe((message: DirectLineMessage) => {
     logger.log("received message ", message);
     let lineMessage:Line.Message;
-    if(message.attachments != null && message.attachments[0].contentType == "application/vnd.microsoft.card.video"){
-      const videoConverter = new VideoConverter();
-      lineMessage = videoConverter.DirectLineToLine(message);
-    }else
-    {
+    if (message.attachments != null) {
+      const attachment = message.attachments[0];
+      switch (attachment.contentType) {
+        case "application/vnd.microsoft.card.video":
+          const videoConverter = new VideoConverter();
+          lineMessage = videoConverter.DirectLineToLine(message);
+          break;
+        case "application/vnd.microsoft.card.hero":
+          const heroCard = new HeroCard();
+          lineMessage = heroCard.DirectLineToLine(message);
+          break;
+      }
+    } else {
       lineMessage = {
         text: message.text || "",
         type: "text"
       };
     }
+
     if (message.conversation && message.conversation.id) {
       lineClient
         .pushMessage(conversations[message.conversation.id], lineMessage)
