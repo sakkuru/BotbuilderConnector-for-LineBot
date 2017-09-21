@@ -96,7 +96,7 @@ directLine.activity$
               type: "text"
             });
             break;
-          case "application/vnd.microsoft.card.video":
+          case "application/vnd.microsoft.card.hero":
             const hero = new HeroCard();
             lineMessages.push(hero.DirectLineToLine(message));
             break;
