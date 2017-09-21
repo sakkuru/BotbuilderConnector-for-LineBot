@@ -3,7 +3,7 @@ import { Middleware } from "@line/bot-sdk/dist/middleware";
 import { DirectLine, Message as DirectLineMessage } from "botframework-directlinejs";
 import * as restify from "restify";
 import * as restifyPlugins from "restify-plugins";
-import {VideoConverter} from "./VideoConverter";
+import { VideoConverter } from "./VideoConverter";
 const XMLHttpRequest = require("xhr2");
 
 global = Object.assign(global, { XMLHttpRequest });
@@ -11,9 +11,9 @@ global = Object.assign(global, { XMLHttpRequest });
 const logger = console;
 const directLine = new DirectLine({
   secret:
-    process.env.DIRECT_LINE_SECRET ||
-    // "8H_E4uG1JPI.cwA.7R0.75PQaEeOKu9rZOKqsZRTx0DX5apb75tIC0szEodaLgc" // Evan's
-    "kMVxrgDSM6w.cwA.Bnw.RPkFc8hVzG6hk_JFJ4ke3U0lmo2krScd4h7IqI2w4XI" // saki's
+  process.env.DIRECT_LINE_SECRET ||
+  // "8H_E4uG1JPI.cwA.7R0.75PQaEeOKu9rZOKqsZRTx0DX5apb75tIC0szEodaLgc" // Evan's
+  "kMVxrgDSM6w.cwA.Bnw.RPkFc8hVzG6hk_JFJ4ke3U0lmo2krScd4h7IqI2w4XI" // saki's
 });
 
 /**
@@ -32,8 +32,8 @@ server.listen(process.env.port || process.env.PORT || 9999 || 3978, () => {
 
 const lineConfig: Line.ClientConfig & Line.MiddlewareConfig = {
   channelAccessToken:
-    process.env.LINE_CHANNEL_ACCESS_TOKEN ||
-    "pjGjFSn+tjX+rfWBfNIR3wbwS/KXA1GDHc0Qb3RMXxNVFLAyjVFfcfaIbte2LWFOEYy2wNENtLROxUiPeqGrg2MOwdz1h+DGEFCGUurLSXnDTz8ki9X3/OZ43tz1KJWbYmDo0/uvsqDReZ1DZP9ZcwdB04t89/1O/w1cDnyilFU=",
+  process.env.LINE_CHANNEL_ACCESS_TOKEN ||
+  "pjGjFSn+tjX+rfWBfNIR3wbwS/KXA1GDHc0Qb3RMXxNVFLAyjVFfcfaIbte2LWFOEYy2wNENtLROxUiPeqGrg2MOwdz1h+DGEFCGUurLSXnDTz8ki9X3/OZ43tz1KJWbYmDo0/uvsqDReZ1DZP9ZcwdB04t89/1O/w1cDnyilFU=",
   channelSecret: process.env.LINE_CHANNEL_SECRET || "bdfbed31e6f523f7bfbcdf838ff01caf"
 };
 
@@ -83,22 +83,36 @@ directLine.activity$
   // .filter(activity => activity.type === "message")
   .subscribe((message: DirectLineMessage) => {
     logger.log("received message ", message);
-    let lineMessage:Line.Message;
-    if(message.attachments != null && message.attachments[0].contentType == "application/vnd.microsoft.card.video"){
-      const videoConverter = new VideoConverter();
-      lineMessage = videoConverter.DirectLineToLine(message);
-    }else
-    {
-      lineMessage = {
-        text: message.text || "",
+    let lineMessages: Line.Message[] = [];
+    if (message.attachments != null && message.attachments.length > 0) {
+      message.attachments.forEach(element => {
+        switch (element.contentType) {
+          case "application/vnd.microsoft.card.video":
+            // const videoConverter = new VideoConverter(); //Masa will update it
+            lineMessages.push( {
+              text: "Sorry, but Video messsage type can not be displayed yet.",
+              type: "text"
+            });
+            break;
+          default:
+          lineMessages.push( {
+            text: "Sorry, but this messsage type can not be displayed yet.",
+            type: "text"
+          });            
+            break;
+        }
+      });
+    } else {
+      lineMessages.push({
+        text: message.text || "Couldn't evaluate messsage text.",
         type: "text"
-      };
+      });
     }
-    if (message.conversation && message.conversation.id) {
-      lineClient
-        .pushMessage(conversations[message.conversation.id], lineMessage)
+    if (message && message.conversation && message.conversation.id) {
+        lineClient
+        .pushMessage(conversations[message.conversation.id], lineMessages)
         .then(() => {
-          logger.log("Replied with", lineMessage);
+          logger.log("Replied with", lineMessages);
         })
         .catch((err: Error) => {
           logger.error(err.message);
