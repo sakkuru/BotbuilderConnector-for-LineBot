@@ -83,28 +83,31 @@ directLine.activity$
   // .filter(activity => activity.type === "message")
   .subscribe((message: DirectLineMessage) => {
     logger.log("received message ", message);
-    let lineMessage: Line.Message;
-    if (message.attachments != null && message.attachments[0].contentType != null) {
-      switch (message.attachments[0].contentType) {
-        case "application/vnd.microsoft.card.video":
-          const videoConverter = new VideoConverter();
-          lineMessage = videoConverter.DirectLineToLine(message);
-          break;
-        default:
-          lineMessage = {
-            text: "Sorry, I can't diplay this type of message yet.",
+    let lineMessages: Line.Message[] = [];
+    if (message.attachments != null && message.attachments.length > 0) {
+      message.attachments.forEach(element => {
+        switch (element.contentType) {
+          case "application/vnd.microsoft.card.video":
+            const videoConverter = new VideoConverter();
+            lineMessages.push(videoConverter.DirectLineToLine(message));
+            break;
+          default:
+          lineMessages.push( {
+            text: "Sorry, but this messsage type can not be displayed yet.",
             type: "text"
-          };
-          break;
-      }
+          });            
+            break;
+        }
+      });
     } else {
-      lineMessage = {
+      lineMessages.push({
         text: message.text || "Couldn't evaluate messsage text.",
         type: "text"
-      };
+      });
     }
-    if (message.conversation && message.conversation.id) {
-      lineClient
+    if (message && message.conversation && message.conversation.id) {
+      lineMessages.forEach(lineMessage => {
+        lineClient
         .pushMessage(conversations[message.conversation.id], lineMessage)
         .then(() => {
           logger.log("Replied with", lineMessage);
@@ -112,5 +115,6 @@ directLine.activity$
         .catch((err: Error) => {
           logger.error(err.message);
         });
+      });
     }
   });
