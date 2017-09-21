@@ -1,11 +1,11 @@
 import { Client, middleware, validateSignature } from "@line/bot-sdk";
 import { Middleware } from "@line/bot-sdk/dist/middleware";
-import * as builder from "botbuilder";
 import { DirectLine, Message as DirectLineMessage } from "botframework-directlinejs";
 import * as restify from "restify";
 import * as restifyPlugins from "restify-plugins";
-import { LineConnector } from "./LineConnector";
-global.XMLHttpRequest = require("xhr2");
+const XMLHttpRequest = require("xhr2");
+
+global = Object.assign(global, { XMLHttpRequest });
 
 const logger = console;
 const directLine = new DirectLine({
@@ -14,6 +14,13 @@ const directLine = new DirectLine({
     // "8H_E4uG1JPI.cwA.7R0.75PQaEeOKu9rZOKqsZRTx0DX5apb75tIC0szEodaLgc" // Evan's
     "kMVxrgDSM6w.cwA.Bnw.RPkFc8hVzG6hk_JFJ4ke3U0lmo2krScd4h7IqI2w4XI" // saki's
 });
+
+/**
+ * Map conversation ID to user ID
+ */
+const conversations: {
+  [messageId: string]: string;
+} = {};
 
 const server = restify.createServer();
 server.use(restifyPlugins.bodyParser({}));
@@ -37,23 +44,24 @@ server.post(endpoint, async (req, res) => {
     for (const event of req.body.events) {
       switch (event.type) {
         case "message":
-          logger.log(event);
-          directLine
-            .postActivity({
-              from: {
-                id: event.source.userId,
-                name: "user" // TODO:figure out the user's name. 
-              },
-              text: event.message.text,
-              type: "message",
-              value: {
-                token: event.replyToken // Needed to send a response to the message from theb user.
-              }
-            })
-            .subscribe(
-              id => logger.log("Posted activity, assigned ID ", id),
-              error => logger.error("Error posting activity", error)
-            );
+          const activity: DirectLineMessage = {
+            from: {
+              id: event.replyToken,
+              name: event.source.userId // TODO:figure out the user's name.
+            },
+            text: event.message.text,
+            type: "message"
+          };
+          logger.log("posting activity", activity);
+          directLine.postActivity(activity).subscribe(
+            messageId => {
+              const conversationId = messageId.split("|")[0];
+              // conversations[id] = event.replyToken || "";
+              conversations[conversationId] = event.source.userId || "";
+              logger.log("Posted activity, assigned ID ", messageId);
+            },
+            error => logger.error("Error posting activity", error)
+          );
           break;
         case "follow":
           logger.log("follow");
@@ -71,23 +79,21 @@ server.post(endpoint, async (req, res) => {
 
 directLine.activity$
   // .filter(activity => activity.type === "message" && activity.from.id === "yourBotHandle")
-  .filter(activity => activity.type === "message")
+  // .filter(activity => activity.type === "message")
   .subscribe((message: DirectLineMessage) => {
     logger.log("received message ", message);
     const lineMessage: Line.Message = {
-      text: `Hey there, your id is ${message.from.id}! 
-      You said: ${message.text}`,
+      text: message.text || "",
       type: "text"
     };
-    // if (Object.keys(message.value || {}).includes("token")) {
-    if (message.value && Object.keys(message.value).includes("token")) {
+    if (message.conversation && message.conversation.id) {
       lineClient
-        .replyMessage(message.value.token, lineMessage)
+        .pushMessage(conversations[message.conversation.id], lineMessage)
         .then(() => {
-          logger.log("Replied");
+          logger.log("Replied with", lineMessage);
         })
-        .catch(err => {
-          logger.error(err);
+        .catch((err: Error) => {
+          logger.error(err.message);
         });
     }
   });
