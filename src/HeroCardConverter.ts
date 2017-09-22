@@ -4,7 +4,7 @@ import {
     CardImage
 } from "botframework-directlinejs";
 
-export class HeroCard implements AbstractConverter {
+export class HeroCardConverter implements AbstractConverter {
     public lineToDirectLine (event: Line.WebhookEvent): DirectLineActivity{
         return {} as DirectLineActivity;
     }
