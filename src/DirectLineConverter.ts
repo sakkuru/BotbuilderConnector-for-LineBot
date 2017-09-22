@@ -28,7 +28,7 @@ export class DirectLineConverter {
       }
 
       if (converter) {
-        lineMessages.concat(converter.DirectLineToLine(attachment));
+        lineMessages.push(converter.DirectLineToLine(attachment));
       } else {
         lineMessages.push({
           text: `Unsupported DirectLine type: ${attachment.contentType}`,
