@@ -15,8 +15,7 @@ export class HeroCardConverter{
     private static CreateButtonTemplateMessage(attachment:HeroCard):Line.TemplateMessage{
         // Create Buttons
         const buttonsTemplate:Line.TemplateButtons = {
-            actions: attachment.content.buttons ? this.CreateMessageActions
-            (attachment.content.buttons) : [],
+            actions: attachment.content.buttons ? this.CreateMessageActions(attachment.content.buttons) : [],
             text:attachment.content.text ? attachment.content.text : "",
             thumbnailImageUrl: attachment.content.images? attachment.content.images[0].url : "",
             title: attachment.content.title,
