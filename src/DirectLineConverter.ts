@@ -1,11 +1,14 @@
-import { Message } from "botframework-directlinejs";
+import { Attachment, HeroCard, Message } from "botframework-directlinejs";
 import { AbstractConverter } from "./AbstractConverter";
 import { AudioConverter } from "./AudioConverter";
+import { HeroCardConverter } from "./HeroCardConverter";
 import { VideoConverter } from "./VideoConverter";
 
 export class DirectLineConverter {
   public static convertDirectLineToLine(dlMessage: Message): Line.Message[] {
     const lineMessages: Line.Message[] = [];
+    const attachments: Attachment[]=[];
+
     if (dlMessage.text) {
       lineMessages.push({
         text: dlMessage.text,
@@ -14,6 +17,7 @@ export class DirectLineConverter {
     }
 
     // Iterate over all possible attachments and add them to message array
+    const heroCards:HeroCard[]  = [];
     for (const attachment of dlMessage.attachments || []) {
       let converter: AbstractConverter | null = null;
       switch (attachment.contentType) {
@@ -23,18 +27,24 @@ export class DirectLineConverter {
         case "application/vnd.microsoft.card.audio":
           converter = new AudioConverter();
           break;
+        case "application/vnd.microsoft.card.hero":
+          heroCards.push(attachment as HeroCard);
+          break;
         default:
           break;
       }
 
       if (converter) {
-        lineMessages.concat(converter.DirectLineToLine(attachment));
+        lineMessages.push(converter.DirectLineToLine(attachment));
       } else {
         lineMessages.push({
           text: `Unsupported DirectLine type: ${attachment.contentType}`,
           type: "text"
         });
       }
+    }
+    if(attachments.length > 0){
+      lineMessages.push(HeroCardConverter.DirectLineToLine(heroCards));
     }
 
     return lineMessages;
