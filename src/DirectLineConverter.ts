@@ -1,8 +1,8 @@
-import { Message, Attachment,HeroCard } from "botframework-directlinejs";
+import { Attachment, HeroCard, Message } from "botframework-directlinejs";
 import { AbstractConverter } from "./AbstractConverter";
 import { AudioConverter } from "./AudioConverter";
+import { HeroCardConverter } from "./HeroCardConverter";
 import { VideoConverter } from "./VideoConverter";
-import {HeroCardConverter} from "./HeroCardConverter";
 
 export class DirectLineConverter {
   public static convertDirectLineToLine(dlMessage: Message): Line.Message[] {
