@@ -1,52 +1,71 @@
-import {AbstractConverter} from './AbstractConverter';
-import {
-    Activity as DirectLineActivity,
-    CardImage
-} from "botframework-directlinejs";
+import {HeroCard,CardAction} from "botframework-directlinejs";
 
-export class HeroCardConverter implements AbstractConverter {
-    public lineToDirectLine (event: Line.WebhookEvent): DirectLineActivity{
-        return {} as DirectLineActivity;
+//Want to consolidate with Interface like AbstractConverter for maintain easily
+export class HeroCardConverter{
+    public static DirectLineToLine (attachments: HeroCard[]): Line.TemplateMessage{
+        //We expects there is at least 1 attachment
+        if(attachments.length === 1){
+            return this.CreateButtonTemplateMessage(attachments[0]);
+        }
+        else{
+            return this.CreateCarouselTemplateMessage(attachments);
+        }
     }
 
-    public DirectLineToLine (event: DirectLineActivity): Line.Message {
-        const attachment = event.attachments[0];
-        const content = attachment.content;
-        const lineButtons = [];
-        let image: CardImage;
+    private static CreateButtonTemplateMessage(attachment:HeroCard):Line.TemplateMessage{
+        //Create Buttons
+        const buttonsTemplate:Line.TemplateButtons ={
+            type:"buttons",
+            thumbnailImageUrl:attachment.content.images? attachment.content.images[0].url : "",
+            title: attachment.content.title,
+            text:attachment.content.text ? attachment.content.text : "",
+            actions: attachment.content.buttons ? this.CreateMessageActions(attachment.content.buttons) : []
+        };
+        //Create Message
+        const message:Line.TemplateMessage = {
+            type:"template",
+            altText:"Loading..", //TODO: Confirm what is good for this property and will modify.
+            template:buttonsTemplate
+        }
+        return message;
+    }
 
-        if (content.buttons) {
-            for (const button of content.buttons) {
-                lineButtons.push({
-                    "label": button.title,
-                    "text": button.value,
-                    "type": "message",
-                })
-            }
+    private static CreateCarouselTemplateMessage(attachments:HeroCard[]):Line.TemplateMessage{
+        //Create Column object
+        const columnObjects:Line.TemplateColumn[] = [];
+        for (let attachment of attachments){
+            columnObjects.push({
+               thumbnailImageUrl: attachment.content.images ? attachment.content.images[0].url : "",
+               title : attachment.content.title,
+               text: attachment.content.text ? attachment.content.text : "",
+               actions: attachment.content.buttons ? this.CreateMessageActions(attachment.content.buttons) : [],
+            });
         }
 
-        if (content.images) {
-            image = content.images[0] as CardImage;
+        //Create Carousel
+        const carousel:Line.TemplateCarousel = {
+            type:"carousel",
+            columns: columnObjects
         }
 
-        const lineMessage: Line.Message = {
-            "altText": event.text,
-            "template": {
-              "text": content.text ? content.text : event.text,
-              "title": content.title ? content.title : event.text,
-              "type": "buttons"
-            },
-            "type": "template",
+        //Create Template Message
+        const message:Line.TemplateMessage = {
+            type:"template",
+            altText:"Loading..",
+            template:carousel
         }
+        return message;
+    }
 
-        if (image) {
-            lineMessage.template.thumbnailImageUrl = image.url;
+    private static CreateMessageActions(buttons:CardAction[]):Line.TemplateAction<{label:string}>[]{
+        const messageActions:Line.TemplateAction<{label:string}>[] = [];
+        for (let button of buttons){
+            messageActions.push({
+                type:"message",
+                label:button.title,
+                text:button.value,
+            });
         }
-
-        if (content.buttons) {
-            lineMessage.template.actions = lineButtons;
-        }
-
-        return lineMessage;
+        return messageActions;
     }
 }
