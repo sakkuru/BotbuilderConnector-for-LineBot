@@ -14,7 +14,7 @@
 8. Copy https url. In the screen shot below, please copy `https://6da04349.ngrok.io`
 ![ngrok run](./img/ngrokrun.PNG)
 9. Open your bot setting in [LINE Developer page](https://developers.line.me) and update your webhook url.
-![webhook](./img/LINESetting.png)
+![webhook](./img/LINESetting.PNG)
 10. This is a time to send message to LINE. Please send test message, then you will get LINE message like this.
 ![success](./img/success.jpg)
 
