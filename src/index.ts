@@ -11,9 +11,7 @@ global = Object.assign(global, { XMLHttpRequest });
 const logger = console;
 const directLine = new DirectLine({
   secret:
-    process.env.DIRECT_LINE_SECRET ||
-    // "8H_E4uG1JPI.cwA.7R0.75PQaEeOKu9rZOKqsZRTx0DX5apb75tIC0szEodaLgc" // Evan's
-    "kMVxrgDSM6w.cwA.Bnw.RPkFc8hVzG6hk_JFJ4ke3U0lmo2krScd4h7IqI2w4XI" // saki's
+    process.env.DIRECT_LINE_SECRET || "Insert your Microsoft Bot framework LINE Secret"
 });
 
 /**
@@ -26,9 +24,8 @@ const conversations: {
 
 const lineConfig: Line.ClientConfig & Line.MiddlewareConfig = {
   channelAccessToken:
-    process.env.LINE_CHANNEL_ACCESS_TOKEN ||
-    "pjGjFSn+tjX+rfWBfNIR3wbwS/KXA1GDHc0Qb3RMXxNVFLAyjVFfcfaIbte2LWFOEYy2wNENtLROxUiPeqGrg2MOwdz1h+DGEFCGUurLSXnDTz8ki9X3/OZ43tz1KJWbYmDo0/uvsqDReZ1DZP9ZcwdB04t89/1O/w1cDnyilFU=",
-  channelSecret: process.env.LINE_CHANNEL_SECRET || "bdfbed31e6f523f7bfbcdf838ff01caf"
+    process.env.LINE_CHANNEL_ACCESS_TOKEN || "Inset your own LINE Channel Access Token",
+  channelSecret: process.env.LINE_CHANNEL_SECRET || "Insert your LINE Channel Secret"
 };
 const lineClient = new Client(lineConfig);
 
